@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -19,14 +20,18 @@ class UserController extends Controller
 
     public function add()
     {
-        return view('sidebar-components.users-add');
+        $roles = Role::all();
+        return view('sidebar-components.users-add', compact('roles'));
     }
 
     // Show the form to edit an existing user
     public function edit($user_id)
     {
         $user = User::findOrFail($user_id);
-        return view('sidebar-components.users-edit', compact('user'));
+        $roles = Role::all();
+
+        \Log::info('Edit for user', ['user_id' => $user->name]);
+        return view('sidebar-components.users-edit', compact('user', 'roles'));
     }
 
     public function destroy($user_id)
@@ -40,7 +45,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|string|max:100',
+            'email' => 'required|string|email|max:100|unique:users,user_email',
             'password' => 'required|string|max:50',
             'role_id' => 'required|string|size:6',
         ]);
@@ -60,18 +65,21 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'email' => 'required|string|max:100',
-            'password' => 'required|string|max:50',
-            'role_id' => 'required|char:6',
+            'email' => 'required|string|email|max:100',
+            'password' => 'required|string|max:80',
+            'role_id' => 'required|string|size:6',
         ]);
 
         $user = User::findOrFail($user_id);
+
         $user->update([
             'user_name' => $request->name,
             'user_email' => $request->email,
-            'user_pwd' => $request->password,
+            'user_pwd' => $request->password ? Hash::make($request->password) : $user->user_pwd,
             'role_id' => $request->role_id,
         ]);
+
+        \Log::info('User updated', ['user_id' => $user->user_id]);
 
         return redirect()->route('users')->with('success', 'User updated successfully.');
     }

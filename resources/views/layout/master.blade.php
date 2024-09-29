@@ -100,7 +100,7 @@
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
-            <a href="/" class="brand-link">
+            <a href="{{ route('home') }}" class="brand-link {{ request()->is('home') ? 'active' : '' }}">
                 Store Management
             </a>
 

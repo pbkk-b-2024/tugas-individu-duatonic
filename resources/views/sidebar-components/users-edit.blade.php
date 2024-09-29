@@ -26,8 +26,14 @@
             </div>
 
             <div class="form-group">
-                <label for="role_id">Role ID</label>
-                <input type="text" class="form-control" id="role_id" name="role_id" value="{{ $user->role_id }}" required>
+                <label for="role_id">Role</label>
+                <select class="form-control" id="role_id" name="role_id" required>
+                    @foreach($roles as $role)
+                        <option value="{{ $role->role_id }}" {{ $user->role_id == $role->role_id ? 'selected' : '' }}>
+                            {{ $role->role_name }}
+                        </option>
+                    @endforeach
+                </select>
             </div>
 
             <button type="submit" class="btn btn-primary">Update User</button>

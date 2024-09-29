@@ -1,18 +1,22 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ItemsController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('layout.master');
-})->name('home')->middleware('auth');
+Route::get('/', [DashboardController::class, 'index'])->name('home')->middleware('auth');
 
 //Auth routes
-Route::get('/login', [AuthController::class, 'loginForm'])->name('loginForm');
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::get('/login', [LoginController::class, 'loginForm'])->name('loginForm');
+Route::post('/login', [LoginController::class, 'login'])->name('login');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('register', [RegisterController::class, 'register']);
 
 //Items routes
 Route::get('/items', [ItemsController::class, 'index'])->name('items');
@@ -38,8 +42,7 @@ Route::get('/roles/edit/{id}', [RoleController::class, 'edit'])->name('roles.edi
 Route::put('/roles/edit/{id}', [RoleController::class, 'update'])->name('roles.update');
 Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
-
-
+//Fallback route
 Route::fallback(function () {
-    return view('layout.master');
+    return view('error');
 });
