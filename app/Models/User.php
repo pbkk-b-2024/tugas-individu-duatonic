@@ -2,44 +2,60 @@
 
 namespace App\Models;
 
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'users';
     protected $primaryKey = 'user_id';
-    public $incrementing = false;
-    protected $keyType = 'char';
+    public $incrementing = true;
+    // public $incrementing = false;
+    protected $keyType = 'integer';
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'user_name',
-        'user_email',
-        'user_pwd',
+        'name',
+        'email',
+        'avatar',
+        'password',
         'role_id',
     ];
 
-    public $timestamps = true;
-
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
     protected $hidden = [
-        'user_pwd',
+        'password',
         'remember_token',
     ];
 
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-
-    public function getAuthPassword()
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
     {
-        return $this->user_pwd;
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 
     public function getAuthIdentifierName()
     {
-        return 'user_email';
+        return 'user_id';  // identifier name
     }
 
     public function role()
@@ -47,17 +63,17 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'role_id', 'role_id');
     }
 
-    public function scopeSearch($query, $searchTerm)
-    {
+    public function scopeSearch($query, $searchTerm) {
         if ($searchTerm) {
             return $query->where(function ($q) use ($searchTerm) {
-                $fillable = $this->fillable;
-
+                $fillable = $this->fillable; // Use self to reference the current model
+                
                 foreach ($fillable as $field) {
                     $q->orWhere($field, 'LIKE', '%' . $searchTerm . '%');
                 }
             });
         }
-        return $query;
+
+        return $query; // Return the original query if no search term is provided
     }
 }

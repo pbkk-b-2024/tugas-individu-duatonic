@@ -2,68 +2,44 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
 use Illuminate\Http\Request;
+use App\Models\Role;
 
 class RoleController extends Controller
 {
     public function index(Request $request)
     {
-        $searchTerm = $request->input('search');
+        $search = $request->input('search');
 
-        $data['roles'] = Role::search($searchTerm)->paginate(20); // Fetch all roles from the database
+        $roles = Role::search($search)->paginate(20);
 
-        return view('sidebar-components.roles', compact('data'));
+        return view('main.roles', compact('roles'));
     }
 
     public function add()
     {
-        return view('sidebar-components.roles-add');
-    }
-
-    // Show the form to edit an existing role
-    public function edit($role_id)
-    {
-        $role = Role::findOrFail($role_id);
-        return view('sidebar-components.roles-edit', compact('role'));
-    }
-
-    public function destroy($role_id)
-    {
-        $role = Role::findOrFail($role_id); // Find the role by its ID
-        $role->delete(); // Delete the role from the database
-        return redirect()->back()->with('success', 'Role deleted successfully');
+        return view('main.partials.role-add');
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:100',
-            'desc' => 'required|string|max:255',
+            'role_name' => ['required', 'string', 'max:255'],
+            'role_description' => ['required', 'string', 'max:255'],
         ]);
-
+    
         Role::create([
-            'role_name' => $request->name,
-            'role_description' => $request->desc,
+            'role_name' => $request->role_name,
+            'role_description' => $request->role_description,
         ]);
-
-        return redirect()->route('roles')->with('success', 'Role added successfully.');
+    
+        return redirect()->route('roles.index')->with('success', 'Role added successfully.');
     }
 
-    // Update the specified role in the database
-    public function update(Request $request, $role_id)
+    public function edit(Request $id)
     {
-        $request->validate([
-            'name' => 'required|string|max:100',
-            'desc' => 'required|string|max:255',
-        ]);
+        $role = Role::findOrFail($id);
 
-        $role = Role::findOrFail($role_id);
-        $role->update([
-            'role_name' => $request->name,
-            'role_description' => $request->desc,
-        ]);
-
-        return redirect()->route('roles')->with('success', 'Role updated successfully.');
+        return view('main.partials.role-edit', compact('role'));
     }
 }

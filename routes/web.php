@@ -1,48 +1,47 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ItemController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\ItemsController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\AvatarController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [DashboardController::class, 'index'])->name('home')->middleware('auth');
+Route::get('/', function () {
+    return view('dashboard');
+})->name('dashboard');
 
-//Auth routes
-Route::get('/login', [LoginController::class, 'loginForm'])->name('loginForm');
-Route::post('/login', [LoginController::class, 'login'])->name('login');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+// Route::get('/dashboard', function () {
+//     return view('dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('register', [RegisterController::class, 'register']);
+Route::get('/items', [ItemController::class, 'index'])->name('items.index');
+Route::get('/items/add', [ItemController::class, 'add'])->name('items.add');
+Route::post('/items', [ItemController::class, 'store'])->name('items.store');
+Route::get('/items/{id}', [ItemController::class, 'edit'])->name('items.edit');
 
-//Items routes
-Route::get('/items', [ItemsController::class, 'index'])->name('items');
-Route::get('/items/add', [ItemsController::class, 'add'])->name('items.add');
-Route::post('/items/add', [ItemsController::class, 'store'])->name('items.store');
-Route::get('/items/edit/{id}', [ItemsController::class, 'edit'])->name('items.edit');
-Route::put('/items/edit/{id}', [ItemsController::class, 'update'])->name('items.update');
-Route::delete('/items/{id}', [ItemsController::class, 'destroy'])->name('items.destroy');
-
-//Users routes
-Route::get('/users', [UserController::class, 'index'])->name('users');
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
 Route::get('/users/add', [UserController::class, 'add'])->name('users.add');
-Route::post('/users/add', [UserController::class, 'store'])->name('users.store');
+Route::post('/users', [UserController::class, 'store'])->name('users.store');
 Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('users.edit');
 Route::put('/users/edit/{id}', [UserController::class, 'update'])->name('users.update');
 Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
-//Roles routes
-Route::get('/roles', [RoleController::class, 'index'])->name('roles');
+Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
 Route::get('/roles/add', [RoleController::class, 'add'])->name('roles.add');
-Route::post('/roles/add', [RoleController::class, 'store'])->name('roles.store');
-Route::get('/roles/edit/{id}', [RoleController::class, 'edit'])->name('roles.edit');
-Route::put('/roles/edit/{id}', [RoleController::class, 'update'])->name('roles.update');
-Route::delete('/roles/{id}', [RoleController::class, 'destroy'])->name('roles.destroy');
+Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+Route::get('/roles/{id}', [RoleController::class, 'edit'])->name('roles.edit');
 
-//Fallback route
-Route::fallback(function () {
-    return view('error');
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Route::middleware('auth')->group(function () {
+//     Route::get('/profile/picture-options', [AvatarController::class, 'showOptions'])->name('profile.picture-options');
+//     Route::post('/profile/picture-update', [AvatarController::class, 'update'])->name('profile.picture-update');
+//     Route::post('/profile/picture-upload', [AvatarController::class, 'upload'])->name('profile.picture-upload');
+// });
+
+require __DIR__.'/auth.php';
