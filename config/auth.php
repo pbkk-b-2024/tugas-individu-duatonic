@@ -58,11 +58,14 @@ return [
     | Supported: "database", "eloquent"
     |
     */
+    // 'driver' => 'custom',
 
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
+            // 'driver' => 'custom',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+            'identifier' => 'user_id',
         ],
 
         // 'users' => [

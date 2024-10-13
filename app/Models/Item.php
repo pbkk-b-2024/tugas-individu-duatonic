@@ -21,12 +21,22 @@ class Item extends Model
      */
     protected $fillable = [
         'item_name',
-        'item_category',
+        'category_id',
         'item_price',
         'item_quantity'
     ];
 
     public $timestamps = false;
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id', 'category_id');
+    }
+
+    public function orders()
+    {
+        return $this->belongsToMany(Order::class, 'order_detail')->withPivot('od_quantity', 'od_price');
+    }
 
     public function scopeSearch($query, $searchTerm) {
         if ($searchTerm) {
