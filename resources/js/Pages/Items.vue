@@ -27,6 +27,10 @@ const fetchItems = (url = null) => {
     }
 };
 
+const searchItems = () => {
+    Inertia.get(route('items.index'), { search: search.value }, { preserveState: true });
+};
+
 onMounted(() => {
     search.value = props.search || '';
     console.log('Components at Items.vue mounted!');
@@ -54,7 +58,7 @@ onMounted(() => {
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <!-- Search Form -->
-                <form @submit.prevent="fetchItems" class="form-inline rounded-md py-4 flex items-center">
+                <form @submit.prevent="searchItems" class="form-inline rounded-md py-4 flex items-center">
                     <input v-model="search" type="text" name="search" class="form-control mr-2 rounded-md border-gray-300 px-4" placeholder="Search items">
                     <button type="submit" class="btn btn-primary rounded-md bg-gray-800 text-white px-4 py-2">Search</button>
                 </form>

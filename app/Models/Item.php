@@ -31,11 +31,14 @@ class Item extends Model
     public function scopeSearch($query, $searchTerm) {
         if ($searchTerm) {
             return $query->where(function ($q) use ($searchTerm) {
-                foreach ($this->fillable as $field) {
+                $fillable = $this->fillable; // Use self to reference the current model
+                
+                foreach ($fillable as $field) {
                     $q->orWhere($field, 'LIKE', '%' . $searchTerm . '%');
                 }
             });
         }
-        return $query;
+
+        return $query; // Return the original query if no search term is provided
     }
 }
