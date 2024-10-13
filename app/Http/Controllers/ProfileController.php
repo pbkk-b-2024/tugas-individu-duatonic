@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
+use Inertia\Response;
 use App\Models\Role;
 
 class ProfileController extends Controller
@@ -16,12 +18,13 @@ class ProfileController extends Controller
     /**
      * Display the user's profile form.
      */
-    public function edit(Request $request): View
+    public function edit(Request $request): Response
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-            'role' => Role::find($request->user()->role_id),
-            'availablePictures' => Storage::disk('public')->files('avatars'),
+        $role = Role::findOrFail($request->user()->role_id);
+        return Inertia::render('Profile/Edit', [
+            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'role' => $role,
+            'status' => session('status'),
         ]);
     }
 
@@ -36,21 +39,9 @@ class ProfileController extends Controller
             $request->user()->email_verified_at = null;
         }
 
-        if($request->has('avatar'))
-        {
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $request->user()->avatar = $path;
-            \Log::info('Avatar uploaded: ' . $path);
-        }
-        else if($request->has('selected_picture'))
-        {
-            $request->user()->avatar = $request->input('selected_picture');
-        }
-
-        \Log::info('User avatar updated: ' . $request->user()->avatar);
         $request->user()->save();
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+        return Redirect::route('profile.edit');
     }
 
     /**
@@ -58,7 +49,7 @@ class ProfileController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
-        $request->validateWithBag('userDeletion', [
+        $request->validate([
             'password' => ['required', 'current_password'],
         ]);
 
@@ -72,24 +63,5 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
-    }
-
-    public function updatePicture(Request $request)
-    {
-        $request->validate([
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'selected_picture' => 'nullable|string',
-        ]);
-
-        $user = $request->user();
-
-        $path = $request->file('avatar')->store('avatars', 'public');
-        $user->avatar = $path;
-        \Log::info('Avatar uploaded: ' . $path);
-
-        $user->save();
-        \Log::info('User avatar updated: ' . $user->avatar);
-
-        return redirect()->route('profile.edit')->with('status', 'profile-picture-updated');
     }
 }

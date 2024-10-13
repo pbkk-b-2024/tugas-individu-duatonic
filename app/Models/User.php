@@ -9,13 +9,8 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
-
-    protected $table = 'users';
-    protected $primaryKey = 'user_id';
-    public $incrementing = true;
-    // public $incrementing = false;
-    protected $keyType = 'integer';
 
     /**
      * The attributes that are mass assignable.
@@ -25,7 +20,6 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
-        'avatar',
         'password',
         'role_id',
     ];
@@ -40,6 +34,23 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    // Other model properties and methods...
+
+    /**
+     * Determine if the user is an admin.
+     *
+     * @return bool
+     */
+    public function getIsAdminAttribute()
+    {
+        return $this->attributes['role_id'] === 'ROL001';
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role_id === 'ROL001';
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -51,29 +62,5 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
-    }
-
-    public function getAuthIdentifierName()
-    {
-        return 'user_id';  // identifier name
-    }
-
-    public function role()
-    {
-        return $this->belongsTo(Role::class, 'role_id', 'role_id');
-    }
-
-    public function scopeSearch($query, $searchTerm) {
-        if ($searchTerm) {
-            return $query->where(function ($q) use ($searchTerm) {
-                $fillable = $this->fillable; // Use self to reference the current model
-                
-                foreach ($fillable as $field) {
-                    $q->orWhere($field, 'LIKE', '%' . $searchTerm . '%');
-                }
-            });
-        }
-
-        return $query; // Return the original query if no search term is provided
     }
 }

@@ -31,7 +31,7 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'string', 'exists:'.Role::class.',role_id'],
+            'role' => ['required', 'string'],
         ]);
 
         User::create([
@@ -44,25 +44,25 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('status', 'User created!');
     }
 
-    public function edit($user_id)
+    public function edit($id)
     {
-        $user = User::findOrFail($user_id);
+        $user = User::findOrFail($id);
         $roles = Role::all();
 
-        \Log::info('Edit for user', ['user_id' => $user->user_id]);
+        \Log::info('Edit for user', ['id' => $user->id]);
         return view('main.partials.user-edit', compact('user', 'roles'));
     }
 
-    public function update(Request $request, $user_id)
+    public function update(Request $request, $id)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:100', 'unique:users,email,'.$user_id.',user_id'],
+            'email' => ['required', 'string', 'email', 'max:100', 'unique:users,email,'.$id.',id'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'role' => ['required', 'string', 'exists:'.Role::class.',role_id'],
         ]);
         
-        $user = User::findOrFail($user_id);
+        $user = User::findOrFail($id);
 
         $user->update([
             'name' => $request->name,
@@ -71,7 +71,7 @@ class UserController extends Controller
             'role_id' => $request->role,
         ]);
 
-        \Log::info('User updated', ['user_id' => $user->user_id]);
+        \Log::info('User updated', ['id' => $user->id]);
 
         return redirect()->route('users.index')->with('success', 'User updated successfully.');
     }
@@ -81,7 +81,7 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
 
-        \Log::info('User deleted', ['user_id' => $user->user_id]);
+        \Log::info('User deleted', ['id' => $user->id]);
 
         return redirect()->route('users.index')->with('success', 'User deleted successfully.');
     }

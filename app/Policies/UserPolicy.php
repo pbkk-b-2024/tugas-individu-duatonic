@@ -4,14 +4,22 @@ namespace App\Policies;
 
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class UserPolicy
 {
-    public function isAdmin(User $user): Response
+    use HandlesAuthorization;
+
+    /**
+     * Determine if the given user is an admin.
+     *
+     * @param  \App\Models\User  $user
+     * @return bool
+     */
+    public function isAdmin(User $user)
     {
-        return $user->role_id === 'ROL001'
-            ? Response::allow()
-            : Response::deny('You must be an administrator.');
+        // Assuming you have an 'is_admin' column in your users table
+        return $user->role_id === 'ROL001';
     }
 
     /**
@@ -19,7 +27,7 @@ class UserPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->role_id === 'ROL001';
+        //
     }
 
     /**
